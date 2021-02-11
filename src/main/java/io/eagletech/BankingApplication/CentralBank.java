@@ -3,11 +3,15 @@ package io.eagletech.BankingApplication;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CentralBank {
     private final List<Bank> registeredBanks;
+    private final Map<String, Customer> bvnDatabase;
       private CentralBank(){
           registeredBanks = new ArrayList<>();
+          bvnDatabase = new ConcurrentHashMap<>();
     }
 
     public Bank registerNewBank(String bankFullName, String bankShortName) {
@@ -30,6 +34,16 @@ public class CentralBank {
     public boolean validate(Bank gtBank) {
           return registeredBanks.contains(gtBank);
     }
+
+    public void registerCreateBvnFor(Customer customer) {
+          customer.setBvn(generateBvn());
+          bvnDatabase.put(customer.getBvn(), customer);
+    }
+
+    private String generateBvn() {
+          return "generated";
+    }
+
 
     private static class CentralBankSingleTonHelper{
         private static final CentralBank instance = new CentralBank();

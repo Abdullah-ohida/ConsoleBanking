@@ -54,6 +54,15 @@ public class BankingApplicationTests {
      assertThat(gtBank.getBankCode().length(), is(6));
     }
 
+    @Test
+    void banks_canRegisterCustomers(){
+        Bank gtBank = centralBankOfNigeria.registerNewBank("Guarantee Trust Bank PLC", "GT Bank");
+        Customer customer = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
+
+        gtBank.register(customer);
+
+    }
+
 
 
 
