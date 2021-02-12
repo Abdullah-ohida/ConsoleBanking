@@ -35,13 +35,34 @@ public  class Bank {
             CentralBank.createCentralBank().registerCreateBvnFor(customer);
         }
         String accountNumber = generateAccountNumberForCustomer();
-        Account account = new Account(customer,accountNumber);
+        Account account = new Account(customer,accountNumber, this.bankFullName);
         customer.addAccount(account);
         addAccount(account);
     }
 
     private String generateAccountNumberForCustomer() {
-        return "nothing";
+        String accountNumber= bankCode+ String.format("%03d", accountList.size()+1);
+        accountNumber = accountNumber+ generateCheckDigit(bankCode, accountNumber);
+        
+        return accountNumber;
+    }
+
+    private String generateCheckDigit(String bankCode, String accountNumber) {
+        String numberToVerify = bankCode+accountNumber;
+//        A*3+B*7+C*3+D*3+E*7+F*3+G*3+H*7+I*3+J*3+K*7+L*3+M*3+N*7+O*3\
+        int[] checkDigitMultiplier = {3,7,3,3,7,3,3,7,3,3,7,3,3,7,3};
+        int result= 0;
+
+                for(int i = 0; i<checkDigitMultiplier.length; i++){
+                    result += checkDigitMultiplier[i]* numberToVerify.charAt(i);
+                }
+
+                int modulo = result%10;
+                int subtract = Math.abs(modulo - 10);
+                if (subtract == 10){
+                    return "0";
+                }
+        return String.format("%d", subtract);
     }
 
     private void addAccount(Account account) {

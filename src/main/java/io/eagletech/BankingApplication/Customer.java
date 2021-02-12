@@ -25,4 +25,27 @@ public class Customer {
     public void addAccount(Account account) {
         myAccounts.add(account);
     }
+
+    @Override
+    public String toString(){
+        StringBuilder customerProfile= new StringBuilder();
+        customerProfile.append("First Name: ").append(customerFirstName).append("\n");
+        customerProfile.append("Last Name: ").append(customerLastName).append("\n");
+        customerProfile.append("Address: ").append(customerAddress).append("\n\n");
+        if(myAccounts.size()>0){
+            customerProfile.append("My Account List\n");
+        }
+        for(Account account: myAccounts){
+            customerProfile.append(account.toString()).append("\n\n");
+        }
+        return customerProfile.toString();
+
+
+
+
+    }
+
+    public List<Account> getMyAccount() {
+        return myAccounts;
+    }
 }

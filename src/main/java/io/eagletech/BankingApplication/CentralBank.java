@@ -41,7 +41,13 @@ public class CentralBank {
     }
 
     private String generateBvn() {
-          return "generated";
+          SecureRandom randomNumberGenerator = new SecureRandom();
+          return ""+ randomNumberGenerator.nextInt(99_999)+ randomNumberGenerator.nextInt(99_999);
+
+    }
+
+    public boolean validate(String customerBvn) {
+      return bvnDatabase.containsKey(customerBvn);
     }
 
 
