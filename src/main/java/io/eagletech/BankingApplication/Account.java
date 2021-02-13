@@ -68,6 +68,9 @@ public class Account implements Storable{
     public void withDraw(BigDecimal amountToWithdraw, int accountPin) {
         try{
             if(accountPin == getPin()){
+                if(amountToWithdraw.compareTo(accountBalance)>0){
+                    throw new WithdrawFailedException("Insufficient Funds");
+                }
                 accountBalance = accountBalance.subtract(amountToWithdraw);
             }
             else{

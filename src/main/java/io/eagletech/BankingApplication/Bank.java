@@ -110,4 +110,13 @@ public  class Bank implements Storable{
             throw new WithdrawFailedException("Account not found");
         }
     }
+
+    public void transfer(TransferRequest transferRequest) throws BankingApplicationException{
+        Optional<Account> senderAccount = accountDatabase.findById(transferRequest.getSenderAccountNumber());
+        Optional<Account> recieverAccount = accountDatabase.findById(transferRequest.getRecieverAccountNumber());
+        if(senderAccount.isPresent() && recieverAccount.isPresent()){
+            withDrawMoneyFrom(transferRequest.getSenderAccountNumber(), transferRequest.getAmountToTransfer(), transferRequest.getSenderAccountPin());
+            depositMoneyIntoAccount(transferRequest.getAmountToTransfer(), transferRequest.getRecieverAccountNumber());
+        }
+    }
 }
