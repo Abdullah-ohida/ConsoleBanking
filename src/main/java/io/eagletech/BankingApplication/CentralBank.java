@@ -19,7 +19,8 @@ public class CentralBank {
           String uniqueBankNumber = generateUniqueBankNumber();
           Bank newBank = new Bank(bankFullName, bankShortName, uniqueBankNumber);
           saveNewlyCreatedBankToDatabase(newBank);
-          return newBank; }
+          return newBank;
+    }
 
     private void saveNewlyCreatedBankToDatabase(Bank newBank) {
           registeredBanks.save(newBank);
@@ -58,14 +59,9 @@ public class CentralBank {
     }
 
     public Bank findBankByBankCode(String bankCode) {
-
         Optional<Bank> optionalBank = registeredBanks.findById(bankCode);
-        if(optionalBank.isPresent()){
-            return optionalBank.get();
-       }
-        else{
-            throw new BankingApplicationException("Bank does not exist");
-        }
+        if(optionalBank.isPresent()) return optionalBank.get();
+        else throw new BankingApplicationException("Bank does not exist");
     }
 
     private static class CentralBankSingleTonHelper{
