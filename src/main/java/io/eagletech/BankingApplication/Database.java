@@ -1,37 +1,22 @@
 package io.eagletech.BankingApplication;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-public class Database<K> implements Storable<K>{
-    List<K> dataStore = new ArrayList<>();
-    @Override
-    public void save(K k) {
-        dataStore.add(k);
-    }
+public interface Database<K> {
 
-    @Override
-    public K findById(String id) {
-        return dataStore.get(Integer.parseInt(id));
-    }
+    void save(K k);
 
-    @Override
-    public boolean contains(K k) {
-        return dataStore.contains(k);
-    }
 
-    @Override
-    public void delete(K k) {
-        dataStore.remove(k);
-    }
+    boolean contains(K k);
 
-    @Override
-    public List<K> findAll() {
-        return dataStore;
-    }
+    void delete(K k);
 
-    @Override
-    public int size() {
-        return dataStore.size();
-    }
+    List<K> findAll();
+
+    int size();
+
+   Optional<K> find(Storable storable);
+
+    Optional<K> findById(String storableId);
 }

@@ -1,17 +1,16 @@
 package io.eagletech.BankingApplication;
 
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.SplittableRandom;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CentralBank {
-    private final Storable<Bank> registeredBanks;
+    private final Database<Bank> registeredBanks;
     private final Map<String, Customer> bvnDatabase;
 
     private CentralBank(){
-          registeredBanks = new Database<>();
+          registeredBanks = new DatabaseImpl<>();
           bvnDatabase = new ConcurrentHashMap<>();
     }
 
@@ -19,8 +18,7 @@ public class CentralBank {
           String uniqueBankNumber = generateUniqueBankNumber();
           Bank newBank = new Bank(bankFullName, bankShortName, uniqueBankNumber);
           saveNewlyCreatedBankToDatabase(newBank);
-          return newBank;
-    }
+          return newBank; }
 
     private void saveNewlyCreatedBankToDatabase(Bank newBank) {
           registeredBanks.save(newBank);
@@ -32,8 +30,8 @@ public class CentralBank {
           return uniqueBankNumber;
     }
 
-    public boolean validate(Bank banktoValidate) {
-          return registeredBanks.contains(banktoValidate);
+    public boolean validate(Bank bankToValidate) {
+          return registeredBanks.contains(bankToValidate);
     }
 
     public void registerCreateBvnFor(Customer customer) {
@@ -42,15 +40,21 @@ public class CentralBank {
     }
 
     private String generateBvn() {
-          SecureRandom randomNumberGenerator = new SecureRandom();
-          return ""+ randomNumberGenerator.nextInt(99_999)+ randomNumberGenerator.nextInt(99_999);
-
+        StringBuilder generatedBvn = new StringBuilder();
+        SplittableRandom randomNumberGenerator = new SplittableRandom();
+        final int LENGTH_OF_BVN = 10;
+        int totalNumberGenerated = 0;
+        while(totalNumberGenerated < LENGTH_OF_BVN){
+            int randomNumber = randomNumberGenerator.nextInt(0, 9);
+            generatedBvn.append(randomNumber);
+            totalNumberGenerated++;
+        }
+        return generatedBvn.toString();
     }
 
     public boolean validate(String customerBvn) {
       return bvnDatabase.containsKey(customerBvn);
     }
-
 
     private static class CentralBankSingleTonHelper{
         private static final CentralBank instance = new CentralBank();

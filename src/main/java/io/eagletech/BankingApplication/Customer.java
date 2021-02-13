@@ -3,23 +3,22 @@ package io.eagletech.BankingApplication;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class Customer {
+public class Customer implements Storable {
     @Getter
     private String customerFirstName;
     @Getter
     private String customerLastName;
     private String customerAddress;
-    private Storable<Account> myAccounts;
+    private Database<Account> myAccounts;
     @Getter @Setter
     private String bvn;
     public Customer(String customerFirstName, String customerLastName, String customerAddress) {
         this.customerFirstName = customerFirstName;
         this.customerLastName = customerLastName;
         this.customerAddress = customerAddress;
-        this.myAccounts = new Database<>() {
+        this.myAccounts = new DatabaseImpl<>() {
         };
     }
 
@@ -48,5 +47,10 @@ public class Customer {
 
     public List<Account> getMyAccount() {
         return myAccounts.findAll();
+    }
+
+    @Override
+    public String getId() {
+        return bvn;
     }
 }
