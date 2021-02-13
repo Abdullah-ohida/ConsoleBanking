@@ -16,7 +16,5 @@ public interface Database<K> {
 
     int size();
 
-   Optional<K> find(Storable storable);
-
     Optional<K> findById(String storableId);
 }

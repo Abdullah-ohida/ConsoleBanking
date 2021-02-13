@@ -31,15 +31,6 @@ public class DatabaseImpl<K extends Storable> implements Database<K> {
         return dataStore.size();
     }
 
-    @Override
-    public Optional<K> find(Storable storable) {
-       for(K item: dataStore) {
-           if (item.equals(storable)){
-               return Optional.of(item);
-           }
-       }
-        return Optional.empty();
-    }
 
     @Override
     public Optional<K> findById(String storableId) {
