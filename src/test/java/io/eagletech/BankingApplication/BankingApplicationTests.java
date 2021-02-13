@@ -75,7 +75,7 @@ public class BankingApplicationTests {
     @Test
     void banks_canRegisterCustomers(){
         Customer customer = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
-        gtBank.register(customer, AccountType.SAVINGS);
+        gtBank.register(customer, AccountType.CURRENT);
         assertThat(gtBank.getRegisteredCustomers().contains(customer.getMyAccount().get(0)), is(true));
 
     }
@@ -97,7 +97,7 @@ public class BankingApplicationTests {
         gtBank.register(chibuzo, AccountType.SAVINGS);
 
         Customer dozie = new Customer("Dozie", "Mongo", "Semicolon Village");
-        gtBank.register(chibuzo, AccountType.SAVINGS);
+        gtBank.register(chibuzo, AccountType.KIDDIES);
         String chibuzoAccountNumber = chibuzo.getMyAccount().get(0).getAccountNumber();
       assertThrows(BankingApplicationException.class,()-> gtBank.closeAccountFor(dozie, chibuzoAccountNumber));
 
@@ -131,7 +131,7 @@ public class BankingApplicationTests {
         Customer customer = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
         gtBank.register(customer, AccountType.SAVINGS);
         String customerBvn = customer.getBvn();
-        firstBank.register(customer, AccountType.SAVINGS);
+        firstBank.register(customer, AccountType.CURRENT);
         String customerBvnAfterSecondAccount = customer.getBvn();
         assertThat(customerBvnAfterSecondAccount, is(customerBvn));
         System.out.println(customer);
@@ -144,7 +144,7 @@ public class BankingApplicationTests {
         Customer customer = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
         gtBank.register(customer, AccountType.SAVINGS);
         String customerGTbankAccountNumber = customer.getMyAccount().get(0).getAccountNumber();
-        firstBank.register(customer, AccountType.SAVINGS);
+        firstBank.register(customer, AccountType.KIDDIES);
         String customerFirstBankAccountNumber = customer.getMyAccount().get(1).getAccountNumber();
 
         assertThat(customerGTbankAccountNumber.length(), is(10));
