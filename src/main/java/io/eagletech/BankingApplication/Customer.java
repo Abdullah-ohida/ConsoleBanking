@@ -12,18 +12,19 @@ public class Customer {
     @Getter
     private String customerLastName;
     private String customerAddress;
-    private List<Account> myAccounts;
+    private Storable<Account> myAccounts;
     @Getter @Setter
     private String bvn;
     public Customer(String customerFirstName, String customerLastName, String customerAddress) {
         this.customerFirstName = customerFirstName;
         this.customerLastName = customerLastName;
         this.customerAddress = customerAddress;
-        this.myAccounts = new ArrayList<>();
+        this.myAccounts = new Database<>() {
+        };
     }
 
     public void addAccount(Account account) {
-        myAccounts.add(account);
+        myAccounts.save(account);
     }
 
     @Override
@@ -35,7 +36,7 @@ public class Customer {
         if(myAccounts.size()>0){
             customerProfile.append("My Account List\n");
         }
-        for(Account account: myAccounts){
+        for(Account account: myAccounts.findAll()){
             customerProfile.append(account.toString()).append("\n\n");
         }
         return customerProfile.toString();
@@ -46,6 +47,6 @@ public class Customer {
     }
 
     public List<Account> getMyAccount() {
-        return myAccounts;
+        return myAccounts.findAll();
     }
 }

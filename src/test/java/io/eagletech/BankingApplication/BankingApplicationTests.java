@@ -4,9 +4,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-
-import java.util.Scanner;
 
 import static org.hamcrest.Matchers.*;
 import  static org.hamcrest.MatcherAssert.*;
@@ -66,6 +63,7 @@ public class BankingApplicationTests {
         Customer customer = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
 
         gtBank.register(customer);
+        assertThat(gtBank.getRegisteredCustomers().contains(customer.getMyAccount().get(0)), is(true));
 
     }
 
@@ -76,6 +74,7 @@ public class BankingApplicationTests {
         assertThat(customer.getBvn(), is(nullValue()));
         gtBank.register(customer);
         assertThat(customer.getBvn(), is(notNullValue()));
+        System.out.println(customer.getBvn());
         assertThat(customer.getBvn().length(), is(10));
 
     }

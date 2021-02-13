@@ -7,10 +7,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CentralBank {
-    private final List<Bank> registeredBanks;
+    private final Storable<Bank> registeredBanks;
     private final Map<String, Customer> bvnDatabase;
-      private CentralBank(){
-          registeredBanks = new ArrayList<>();
+
+    private CentralBank(){
+          registeredBanks = new Database<>();
           bvnDatabase = new ConcurrentHashMap<>();
     }
 
@@ -22,7 +23,7 @@ public class CentralBank {
     }
 
     private void saveNewlyCreatedBankToDatabase(Bank newBank) {
-          registeredBanks.add(newBank);
+          registeredBanks.save(newBank);
     }
 
     private String generateUniqueBankNumber() {
@@ -31,8 +32,8 @@ public class CentralBank {
           return uniqueBankNumber;
     }
 
-    public boolean validate(Bank gtBank) {
-          return registeredBanks.contains(gtBank);
+    public boolean validate(Bank banktoValidate) {
+          return registeredBanks.contains(banktoValidate);
     }
 
     public void registerCreateBvnFor(Customer customer) {
