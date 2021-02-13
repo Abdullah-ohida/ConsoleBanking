@@ -5,7 +5,7 @@ import lombok.Setter;
 
 import java.util.List;
 
-public class Customer implements Storable {
+public class Customer {
     @Getter
     private String customerFirstName;
     @Getter
@@ -49,8 +49,5 @@ public class Customer implements Storable {
         return myAccounts.findAll();
     }
 
-    @Override
-    public String getId() {
-        return bvn;
-    }
+
 }

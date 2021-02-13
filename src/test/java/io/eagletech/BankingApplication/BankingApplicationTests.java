@@ -16,8 +16,7 @@ public class BankingApplicationTests {
     Bank gtBank;
     @BeforeEach
     void startAllTestsWithThis(){
-
-        centralBankOfNigeria = CentralBank.createCentralBank();
+       centralBankOfNigeria = CentralBank.createCentralBank();
         gtBank = centralBankOfNigeria.registerNewBank("Guarantee Trust Bank PLC", "GT Bank");
 
     }
@@ -31,7 +30,6 @@ public class BankingApplicationTests {
     void bank_canBeCreated(){
         Bank gtBank = new Bank("Guarantee Trust Bank PLC", "GT Bank", "058");
         assertThat(gtBank, is(notNullValue()));
-
         String expectedBankToString = """
                 Bank Name: Guarantee Trust Bank PLC
                 Bank Short Name: GT Bank
@@ -46,6 +44,18 @@ public class BankingApplicationTests {
         CentralBank centralBank2 = CentralBank.createCentralBank();
         assertThat(centralBankOfNigeria,is(centralBank2));
     }
+
+    @Test
+    void centralBank_canFindBankByBankCode(){
+       gtBank = centralBankOfNigeria.registerNewBank("Guarantee Trust Bank PLC", "GT Bank");
+        assertThat(centralBankOfNigeria.findBankByBankCode(gtBank.getBankCode()),is(gtBank));
+    }
+
+    @Test
+    void centralBank_canThrowException_whenBankIsNotFound(){
+        assertThrows(BankingApplicationException.class, ()-> centralBankOfNigeria.findBankByBankCode("029384"));
+    }
+
 
     @Test
     void onlyCentralBank_canCreateBank(){

@@ -2,6 +2,7 @@ package io.eagletech.BankingApplication;
 
 import java.security.SecureRandom;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -54,6 +55,17 @@ public class CentralBank {
 
     public boolean validate(String customerBvn) {
       return bvnDatabase.containsKey(customerBvn);
+    }
+
+    public Bank findBankByBankCode(String bankCode) {
+
+        Optional<Bank> optionalBank = registeredBanks.findById(bankCode);
+        if(optionalBank.isPresent()){
+            return optionalBank.get();
+       }
+        else{
+            throw new BankingApplicationException("Bank does not exist");
+        }
     }
 
     private static class CentralBankSingleTonHelper{
