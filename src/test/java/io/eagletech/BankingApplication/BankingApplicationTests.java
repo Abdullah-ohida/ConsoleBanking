@@ -86,8 +86,9 @@ public class BankingApplicationTests {
         Customer customer = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
         gtBank.register(customer, AccountType.SAVINGS);
         String customerAccountNumber = customer.getMyAccount().get(0).getAccountNumber();
+        Account customerAccount = customer.getMyAccount().get(0);
         gtBank.closeAccountFor(customer, customerAccountNumber);
-        assertThat(gtBank.getRegisteredCustomers().contains(customer.getMyAccount().get(0)), is(false));
+        assertThat(gtBank.getRegisteredCustomers().contains(customerAccount), is(false));
 
     }
 

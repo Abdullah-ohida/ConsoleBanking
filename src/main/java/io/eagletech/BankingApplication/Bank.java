@@ -83,9 +83,10 @@ public  class Bank implements Storable{
                         throw new BankingApplicationException("Account number does not belong to customer");
                     }
                     accountDatabase.delete(account1);
+            customer.getMyAccount().remove(account.get());
                 }
         );
-        customer.getMyAccount().remove(account);
+
 
     }
 
@@ -97,9 +98,7 @@ public  class Bank implements Storable{
     public void depositMoneyIntoAccount(BigDecimal amountToDeposit, String customerAccountNumber) {
         Optional<Account> optionalAccount =accountDatabase.findById(customerAccountNumber);
         if(optionalAccount.isPresent()){
-//            optionalAccount.get().deposit(amountToDeposit);
             saveTransaction(optionalAccount.get(), DEBIT, amountToDeposit);
-
         }
         else{
             throw new DepositFailedException("Account not found");
@@ -122,7 +121,7 @@ public  class Bank implements Storable{
     public void withDrawMoneyFrom(String customerAccountNumber, BigDecimal amountToWithdraw, int accountPin) {
         Optional<Account> optionalAccount =accountDatabase.findById(customerAccountNumber);
         if(optionalAccount.isPresent()){
-            optionalAccount.get().withDraw(amountToWithdraw, accountPin);
+            optionalAccount.get().verifyLegibilityForWithdraw(amountToWithdraw, accountPin);
         }
         else{
             throw new WithdrawFailedException("Account not found");
@@ -132,8 +131,8 @@ public  class Bank implements Storable{
 
     public void transfer(TransferRequest transferRequest) throws BankingApplicationException{
         Optional<Account> senderAccount = accountDatabase.findById(transferRequest.getSenderAccountNumber());
-        Optional<Account> recieverAccount = accountDatabase.findById(transferRequest.getReceiverAccountNumber());
-        if(senderAccount.isPresent() && recieverAccount.isPresent()){
+        Optional<Account> receiverAccount = accountDatabase.findById(transferRequest.getReceiverAccountNumber());
+        if(senderAccount.isPresent() && receiverAccount.isPresent()){
             withDrawMoneyFrom(transferRequest.getSenderAccountNumber(), transferRequest.getAmountToTransfer(), transferRequest.getSenderAccountPin());
             depositMoneyIntoAccount(transferRequest.getAmountToTransfer(), transferRequest.getReceiverAccountNumber());
         }

@@ -65,24 +65,19 @@ public class Account implements Storable {
         return accountNumber;
     }
 
-//    public void deposit(BigDecimal amountToDeposit) {
-//
-//        accountBalance = accountBalance.add(amountToDeposit);
-//    }
-
     void updatePin(int oldPin, int newPin) {
         if (oldPin == pin) {
             setPin(newPin);
         }
     }
 
-    public void withDraw(BigDecimal amountToWithdraw, int accountPin) {
+    public void verifyLegibilityForWithdraw(BigDecimal amountToWithdraw, int accountPin) {
         try {
             if (accountPin == getPin()) {
                 if (amountToWithdraw.compareTo(calculateAccountBalance()) > 0) {
                     throw new WithdrawFailedException("Insufficient Funds");
                 }
-//                accountBalance = accountBalance.subtract(amountToWithdraw);
+
             } else {
                 throw new WithdrawFailedException("Incorrect Pin");
             }
