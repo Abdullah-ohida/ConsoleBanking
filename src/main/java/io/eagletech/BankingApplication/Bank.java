@@ -3,8 +3,11 @@ package io.eagletech.BankingApplication;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static io.eagletech.BankingApplication.TransactionType.*;
 
 public  class Bank implements Storable{
 
@@ -94,11 +97,26 @@ public  class Bank implements Storable{
     public void depositMoneyIntoAccount(BigDecimal amountToDeposit, String customerAccountNumber) {
         Optional<Account> optionalAccount =accountDatabase.findById(customerAccountNumber);
         if(optionalAccount.isPresent()){
-            optionalAccount.get().deposit(amountToDeposit);
+//            optionalAccount.get().deposit(amountToDeposit);
+            saveTransaction(optionalAccount.get(), DEBIT, amountToDeposit);
+
         }
         else{
             throw new DepositFailedException("Account not found");
         }
+
+    }
+
+    private void saveTransaction(Account optionalAccount, TransactionType transactionType, BigDecimal transactionAmount) {
+        optionalAccount.getTransaction().add(new Transaction(generateTransactionId(transactionType, optionalAccount.getAccountNumber()), transactionType, transactionAmount, optionalAccount.getAcountName()));
+    }
+
+    private String generateTransactionId(TransactionType transactionType, String accountNumber) {
+        String transactionPrefix = switch (transactionType){
+            case DEBIT-> "dbt";
+            case CREDIT -> "crd";
+        };
+        return accountNumber + transactionPrefix+ LocalDateTime.now();
     }
 
     public void withDrawMoneyFrom(String customerAccountNumber, BigDecimal amountToWithdraw, int accountPin) {
@@ -109,14 +127,15 @@ public  class Bank implements Storable{
         else{
             throw new WithdrawFailedException("Account not found");
         }
+        saveTransaction(optionalAccount.get(), CREDIT, amountToWithdraw);
     }
 
     public void transfer(TransferRequest transferRequest) throws BankingApplicationException{
         Optional<Account> senderAccount = accountDatabase.findById(transferRequest.getSenderAccountNumber());
-        Optional<Account> recieverAccount = accountDatabase.findById(transferRequest.getRecieverAccountNumber());
+        Optional<Account> recieverAccount = accountDatabase.findById(transferRequest.getReceiverAccountNumber());
         if(senderAccount.isPresent() && recieverAccount.isPresent()){
             withDrawMoneyFrom(transferRequest.getSenderAccountNumber(), transferRequest.getAmountToTransfer(), transferRequest.getSenderAccountPin());
-            depositMoneyIntoAccount(transferRequest.getAmountToTransfer(), transferRequest.getRecieverAccountNumber());
+            depositMoneyIntoAccount(transferRequest.getAmountToTransfer(), transferRequest.getReceiverAccountNumber());
         }
     }
 }

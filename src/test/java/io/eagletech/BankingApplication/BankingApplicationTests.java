@@ -110,7 +110,7 @@ public class BankingApplicationTests {
         assertThat(customer.getBvn(), is(nullValue()));
         gtBank.register(customer, AccountType.SAVINGS);
         assertThat(customer.getBvn(), is(notNullValue()));
-        System.out.println(customer.getBvn());
+
         assertThat(customer.getBvn().length(), is(10));
 
     }
@@ -131,10 +131,14 @@ public class BankingApplicationTests {
         Bank firstBank = centralBankOfNigeria.registerNewBank("First Bank of Nigeria", "FBN");
         Customer customer = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
         gtBank.register(customer, AccountType.SAVINGS);
+        customer.getMyAccount().get(0).updatePin(0, 1111);
         String customerBvn = customer.getBvn();
         firstBank.register(customer, AccountType.CURRENT);
         String customerBvnAfterSecondAccount = customer.getBvn();
         assertThat(customerBvnAfterSecondAccount, is(customerBvn));
+        gtBank.depositMoneyIntoAccount(BigDecimal.valueOf(4500), customer.getMyAccount().get(0).getAccountNumber());
+        System.out.println(customer);
+        gtBank.withDrawMoneyFrom(customer.getMyAccount().get(0).getAccountNumber(), BigDecimal.valueOf(3500), 1111);
         System.out.println(customer);
     }
 
@@ -159,7 +163,7 @@ public class BankingApplicationTests {
         Account customerAccount = customer.getMyAccount().get(0);
         String customerAccountNumber = customerAccount.getAccountNumber();
         gtBank.depositMoneyIntoAccount(BigDecimal.valueOf(1000), customerAccountNumber);
-        assertThat(customerAccount.getAccountBalance(), is(BigDecimal.valueOf(1000)));
+        assertThat(customerAccount.calculateAccountBalance(), is(BigDecimal.valueOf(1000)));
     }
 
 
@@ -173,7 +177,7 @@ public class BankingApplicationTests {
         String customerAccountNumber = customerAccount.getAccountNumber();
         assertThrows(DepositFailedException.class, ()->firstBank.depositMoneyIntoAccount(BigDecimal.valueOf(1000), customerAccountNumber));
 
-        assertThat(customerAccount.getAccountBalance(), is(BigDecimal.valueOf(0)));
+        assertThat(customerAccount.calculateAccountBalance(), is(BigDecimal.valueOf(0)));
     }
 
 
@@ -187,7 +191,7 @@ public class BankingApplicationTests {
         gtBank.depositMoneyIntoAccount(BigDecimal.valueOf(1000), customerAccountNumber);
         gtBank.withDrawMoneyFrom(customerAccountNumber, BigDecimal.valueOf(400), 1111);
 
-        assertThat(customerAccount.getAccountBalance(), is(BigDecimal.valueOf(600)));
+        assertThat(customerAccount.calculateAccountBalance(), is(BigDecimal.valueOf(600)));
     }
 
 
@@ -202,7 +206,7 @@ public class BankingApplicationTests {
         gtBank.depositMoneyIntoAccount(BigDecimal.valueOf(1000), customerAccountNumber);
         assertThrows(WithdrawFailedException.class, ()->gtBank.withDrawMoneyFrom(customerAccountNumber, BigDecimal.valueOf(400), 1111));
 
-        assertThat(customerAccount.getAccountBalance(), is(BigDecimal.valueOf(1000)));
+        assertThat(customerAccount.calculateAccountBalance(), is(BigDecimal.valueOf(1000)));
     }
 
 
@@ -216,7 +220,7 @@ public class BankingApplicationTests {
         gtBank.depositMoneyIntoAccount(BigDecimal.valueOf(1000), customerAccountNumber);
         assertThrows(WithdrawFailedException.class, ()->gtBank.withDrawMoneyFrom(customerAccountNumber, BigDecimal.valueOf(400), 1234));
 
-        assertThat(customerAccount.getAccountBalance(), is(BigDecimal.valueOf(1000)));
+        assertThat(customerAccount.calculateAccountBalance(), is(BigDecimal.valueOf(1000)));
     }
 
     @Test
@@ -228,7 +232,7 @@ public class BankingApplicationTests {
         String customerAccountNumber = customerAccount.getAccountNumber();
         gtBank.depositMoneyIntoAccount(BigDecimal.valueOf(1000), customerAccountNumber);
         assertThrows(WithdrawFailedException.class, ()->gtBank.withDrawMoneyFrom("2394839283", BigDecimal.valueOf(400), 1234));
-        assertThat(customerAccount.getAccountBalance(), is(BigDecimal.valueOf(1000)));
+        assertThat(customerAccount.calculateAccountBalance(), is(BigDecimal.valueOf(1000)));
     }
     @Test
     void customer_cantWithdrawMoney_ifAccountIsLow(){
@@ -239,6 +243,15 @@ public class BankingApplicationTests {
         String customerAccountNumber = customerAccount.getAccountNumber();
         gtBank.depositMoneyIntoAccount(BigDecimal.valueOf(1000), customerAccountNumber);
         assertThrows(WithdrawFailedException.class, ()->gtBank.withDrawMoneyFrom(customerAccountNumber, BigDecimal.valueOf(1200), 1111));
+    }
+
+    @Test
+    void transferRequest_canBeCreated(){
+        TransferRequest transferRequest = new TransferRequest(BigDecimal.valueOf(100), "1827364635", "1621625123", 1322);
+        assertThat(transferRequest.getAmountToTransfer(), is(BigDecimal.valueOf(100)));
+        assertThat(transferRequest.getReceiverAccountNumber(), is("1621625123"));
+        assertThat(transferRequest.getSenderAccountNumber(), is("1827364635"));
+        assertThat(transferRequest.getSenderAccountPin(), is(1322));
     }
 
     @Test
@@ -257,15 +270,33 @@ public class BankingApplicationTests {
         dozie.getMyAccount().get(0).updatePin(0,1322);
 
         gtBank.transfer(new TransferRequest(BigDecimal.valueOf(100), chibuzoAccountNumber, dozieAccountNumber, 1111));
-        assertThat(dozie.getMyAccount().get(0).getAccountBalance(), is(BigDecimal.valueOf(100)));
-        assertThat(chibuzo.getMyAccount().get(0).getAccountBalance(), is(BigDecimal.valueOf(900)));
+        assertThat(dozie.getMyAccount().get(0).calculateAccountBalance(), is(BigDecimal.valueOf(100)));
+        assertThat(chibuzo.getMyAccount().get(0).calculateAccountBalance(), is(BigDecimal.valueOf(900)));
 
         gtBank.transfer(new TransferRequest(BigDecimal.valueOf(100), dozieAccountNumber, chibuzoAccountNumber, 1322));
 
-        assertThat(dozie.getMyAccount().get(0).getAccountBalance(), is(BigDecimal.valueOf(0)));
-        assertThat(chibuzo.getMyAccount().get(0).getAccountBalance(), is(BigDecimal.valueOf(1000)));
+        assertThat(dozie.getMyAccount().get(0).calculateAccountBalance(), is(BigDecimal.valueOf(0)));
+        assertThat(chibuzo.getMyAccount().get(0).calculateAccountBalance(), is(BigDecimal.valueOf(1000)));
+    }
 
+    @Test
+    void customers_getAListOfTransactionOnSuccessfulTransaction(){
+        Customer customer = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
+        gtBank.register(customer, AccountType.SAVINGS);
+        Account customerAccount = customer.getMyAccount().get(0);
+        customerAccount.updatePin(0, 1111);
+        String customerAccountNumber = customerAccount.getAccountNumber();
+        gtBank.depositMoneyIntoAccount(BigDecimal.valueOf(1000), customerAccountNumber);
 
+        assertThat(customerAccount.getTransaction().size(), is(1));
+
+        gtBank.depositMoneyIntoAccount(BigDecimal.valueOf(2000), customerAccountNumber);
+
+        assertThat(customerAccount.getTransaction().size(), is(2));
+
+        gtBank.withDrawMoneyFrom(customerAccountNumber, BigDecimal.valueOf(1200), 1111);
+
+        assertThat(customerAccount.getTransaction().size(), is(3));
 
     }
 

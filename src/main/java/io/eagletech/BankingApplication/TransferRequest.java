@@ -8,12 +8,12 @@ import java.math.BigDecimal;
 public class TransferRequest {
     private final BigDecimal amountToTransfer;
     private final String senderAccountNumber;
-    private final String recieverAccountNumber;
+    private final String receiverAccountNumber;
     private final int senderAccountPin;
-    public TransferRequest(BigDecimal amountToTransfer, String senderAccountNumber, String recieverAccount, int senderAccountPin) {
+    public TransferRequest(BigDecimal amountToTransfer, String senderAccountNumber, String receiverAccount, int senderAccountPin) {
         this.amountToTransfer = amountToTransfer;
         this.senderAccountNumber = senderAccountNumber;
-        this.recieverAccountNumber = recieverAccount;
+        this.receiverAccountNumber = receiverAccount;
         this.senderAccountPin = senderAccountPin;
     }
 }
