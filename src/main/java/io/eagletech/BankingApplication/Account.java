@@ -45,15 +45,15 @@ public class Account implements Storable {
     }
 
     public BigDecimal calculateAccountBalance() {
-        BigDecimal accountBalance = new BigDecimal(0);
+        BigDecimal customerCurrentAccountBalance = new BigDecimal(0);
         for(Transaction transaction: successfulTransactions){
             switch (transaction.getTransactionType()){
-                case DEBIT -> accountBalance= accountBalance.subtract(transaction.getTransactionAmount());
-                case CREDIT -> accountBalance = accountBalance.add(transaction.getTransactionAmount());
+                case DEBIT -> customerCurrentAccountBalance= customerCurrentAccountBalance.subtract(transaction.getTransactionAmount());
+                case CREDIT -> customerCurrentAccountBalance = customerCurrentAccountBalance.add(transaction.getTransactionAmount());
             }
 
         }
-        return accountBalance;
+        return customerCurrentAccountBalance;
     }
 
     public String getAccountNumber() {
@@ -73,27 +73,24 @@ public class Account implements Storable {
 
     public void verifyLegibilityForWithdraw(BigDecimal amountToWithdraw, int accountPin) {
         try {
-            if (accountPin == getPin()) {
-                if (amountToWithdraw.compareTo(calculateAccountBalance()) > 0) {
-                    throw new WithdrawFailedException("Insufficient Funds");
-                }
-
-            } else {
-                throw new WithdrawFailedException("Incorrect Pin");
-            }
-
-
+            verifyLegibilityForWithdrawalWith(amountToWithdraw, accountPin);
         } catch (InvalidPinException invalidPinException) {
             throw new WithdrawFailedException(invalidPinException.getMessage());
         }
     }
 
+    private void verifyLegibilityForWithdrawalWith(BigDecimal amountToWithdraw, int accountPin) {
+        boolean pinIsNotCorrect = accountPin != getPin();
+        if (pinIsNotCorrect)  throw new WithdrawFailedException("Incorrect Pin");
+        boolean fundIsInsufficient = amountToWithdraw.compareTo(calculateAccountBalance()) > 0;
+        if (fundIsInsufficient) throw new WithdrawFailedException("Insufficient Funds");
+    }
+
     private int getPin() {
-        if (pin == 0) {
-            throw new InvalidPinException("Pin not Set");
-        } else {
-            return pin;
-        }
+        if (pin == 0) throw new InvalidPinException("Pin not Set");
+
+        return pin;
+
     }
 
     private void setPin(int newPin) {
