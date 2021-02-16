@@ -38,8 +38,6 @@ public class Account implements Storable {
         accountProfile += "Bank Name: " + bankName + "\n";
         accountProfile += "Account Type: " + accountType.toString() + "\n";
         accountProfile += "Customer BVN: " + customerBvn + "\n";
-        //@todo remove account balance later, too sensitive to be in a toString method;
-        accountProfile += "Account Balance: " + calculateAccountBalance().toString() + "\n";
         return accountProfile;
 
     }

@@ -9,10 +9,10 @@ import java.time.LocalDateTime;
 public class Transaction {
     private String transactionId;
     @Getter
-    private TransactionType transactionType;
+    private final TransactionType transactionType;
     private final LocalDateTime transactionDate;
     @Getter
-    private BigDecimal transactionAmount;
+    private final BigDecimal transactionAmount;
     private String actorName;
 
     public Transaction (String transactionId, TransactionType transactionType, BigDecimal transactionAmount, String actorName){
