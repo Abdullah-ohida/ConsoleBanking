@@ -98,7 +98,7 @@ public  class Bank implements Storable{
     public void depositMoneyIntoAccount(BigDecimal amountToDeposit, String customerAccountNumber) {
         Optional<Account> optionalAccount =accountDatabase.findById(customerAccountNumber);
         if(optionalAccount.isPresent()){
-            saveTransaction(optionalAccount.get(), DEBIT, amountToDeposit);
+            saveTransaction(optionalAccount.get(), CREDIT, amountToDeposit);
         }
         else{
             throw new DepositFailedException("Account not found");
@@ -126,7 +126,7 @@ public  class Bank implements Storable{
         else{
             throw new WithdrawFailedException("Account not found");
         }
-        saveTransaction(optionalAccount.get(), CREDIT, amountToWithdraw);
+        saveTransaction(optionalAccount.get(), DEBIT, amountToWithdraw);
     }
 
     public void transfer(TransferRequest transferRequest) throws BankingApplicationException{

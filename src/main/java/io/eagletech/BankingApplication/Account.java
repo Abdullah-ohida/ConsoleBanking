@@ -48,8 +48,8 @@ public class Account implements Storable {
         BigDecimal accountBalance = new BigDecimal(0);
         for(Transaction transaction: successfulTransactions){
             switch (transaction.getTransactionType()){
-                case DEBIT -> accountBalance= accountBalance.add(transaction.getTransactionAmount());
-                case CREDIT -> accountBalance = accountBalance.subtract(transaction.getTransactionAmount());
+                case DEBIT -> accountBalance= accountBalance.subtract(transaction.getTransactionAmount());
+                case CREDIT -> accountBalance = accountBalance.add(transaction.getTransactionAmount());
             }
 
         }
