@@ -17,4 +17,6 @@ public interface Database<K> {
     int size();
 
     Optional<K> findById(String storableId);
+
+    Optional<K> findByName(String receiverBank);
 }

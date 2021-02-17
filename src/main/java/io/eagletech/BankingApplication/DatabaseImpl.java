@@ -2,6 +2,7 @@ package io.eagletech.BankingApplication;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 public class DatabaseImpl<K extends Storable> implements Database<K> {
@@ -39,5 +40,15 @@ public class DatabaseImpl<K extends Storable> implements Database<K> {
             }
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<K> findByName(String receiverBank) {
+        Optional<K> optionalStorable = Optional.empty();
+        for (K item: dataStore){
+            if (item.getName().startsWith(receiverBank.toLowerCase())) optionalStorable = Optional.of(item);
+        }
+        return optionalStorable;
+
     }
 }
