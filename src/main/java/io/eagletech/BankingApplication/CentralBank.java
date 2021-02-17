@@ -6,6 +6,9 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.eagletech.BankingApplication.TransactionType.TRANSFER_IN;
+import static io.eagletech.BankingApplication.TransactionType.TRANSFER_OUT;
+
 public class CentralBank {
     private final Database<Bank> registeredBanks;
     private final Map<String, Customer> bvnDatabase;
@@ -62,6 +65,19 @@ public class CentralBank {
         Optional<Bank> optionalBank = registeredBanks.findById(bankCode);
         if(optionalBank.isPresent()) return optionalBank.get();
         else throw new BankingApplicationException("Bank does not exist");
+    }
+
+    public void transferFundsWith(TransferRequest transferRequest) {
+       Optional<Bank> recieverBank =  findBankByShortName(transferRequest.getReceiverBank());
+        boolean recieverBankExist = recieverBank.isPresent();
+        if(recieverBankExist){
+            recieverBank.get().depositMoneyIntoAccount(transferRequest.getAmountToTransfer(), transferRequest.getReceiverAccountNumber(), TRANSFER_IN);
+            transferRequest.getSenderBank().withDrawMoneyFrom(transferRequest.getSenderAccountNumber(), transferRequest.getAmountToTransfer(), transferRequest.getSenderAccountPin(), TRANSFER_OUT);
+        }
+    }
+
+    private Optional<Bank> findBankByShortName(String receiverBank) {
+        return registeredBanks.findByName(receiverBank);
     }
 
     private static class CentralBankSingleTonHelper{

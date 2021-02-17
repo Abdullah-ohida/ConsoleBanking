@@ -1,39 +1,42 @@
 package io.eagletech.BankingApplication;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 
 import java.math.BigDecimal;
-import java.util.function.BiFunction;
 
+import static io.eagletech.BankingApplication.TransactionType.CREDIT;
 import static org.hamcrest.Matchers.*;
 import  static org.hamcrest.MatcherAssert.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BankingApplicationTests {
-    CentralBank centralBankOfNigeria;
-    Bank gtBank;
-    @BeforeEach
-    void startAllTestsWithThis(){
+    static CentralBank centralBankOfNigeria;
+    static Bank gtBank;
+    static Bank firstBank;
+    @BeforeAll
+    static void startAllTestsWithThis(){
        centralBankOfNigeria = CentralBank.createCentralBank();
-        gtBank = centralBankOfNigeria.registerNewBank("Guarantee Trust Bank PLC", "GT Bank");
+        gtBank = centralBankOfNigeria.registerNewBank("Guarantee Trust Bank PLC", "GTB");
+        firstBank = centralBankOfNigeria.registerNewBank("First Bank of Nigeria PLC", "FBN");
 
     }
 
-    @AfterEach
-    void doThisAfterEachTest(){
+    @AfterAll
+    static void doThisAfterEachTest(){
+        centralBankOfNigeria = null;
+        gtBank = null;
+        firstBank = null;
 
     }
 
     @Test
     void bank_canBeCreated(){
-        Bank gtBank = new Bank("Guarantee Trust Bank PLC", "GT Bank", "058");
+        Bank gtBank = new Bank("Guarantee Trust Bank PLC", "gtb", "058");
         assertThat(gtBank, is(notNullValue()));
         String expectedBankToString = """
                 Bank Name: Guarantee Trust Bank PLC
-                Bank Short Name: GT Bank
+                Bank Short Name: gtb
                 Bank Code: 058
                 """;
         assertThat(gtBank.toString(), is(expectedBankToString));
@@ -74,14 +77,6 @@ public class BankingApplicationTests {
     }
 
     @Test
-    void banks_canRegisterCustomers(){
-        Customer customer = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
-        gtBank.register(customer, AccountType.CURRENT);
-        assertThat(gtBank.getRegisteredCustomers().contains(customer.getMyAccount().get(0)), is(true));
-
-    }
-
-    @Test
     void banks_closeCustomerAccount(){
         Customer customer = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
         gtBank.register(customer, AccountType.SAVINGS);
@@ -89,9 +84,16 @@ public class BankingApplicationTests {
         Account customerAccount = customer.getMyAccount().get(0);
         gtBank.closeAccountFor(customer, customerAccountNumber);
         assertThat(gtBank.getRegisteredCustomers().contains(customerAccount), is(false));
-
     }
 
+
+    @Test
+    void banks_canRegisterCustomers(){
+        Customer customer = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
+        gtBank.register(customer, AccountType.CURRENT);
+        assertThat(gtBank.getRegisteredCustomers().contains(customer.getMyAccount().get(0)), is(true));
+
+    }
 
     @Test
     void customer_canOnlyCloseHisOwnAccount(){
@@ -129,7 +131,6 @@ public class BankingApplicationTests {
 
     @Test
     void customer_maintainsOneBvn_acrossMultipleBanks(){
-        Bank firstBank = centralBankOfNigeria.registerNewBank("First Bank of Nigeria", "FBN");
         Customer customer = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
         gtBank.register(customer, AccountType.SAVINGS);
         customer.getMyAccount().get(0).updatePin(0, 1111);
@@ -145,7 +146,6 @@ public class BankingApplicationTests {
 
     @Test
     void customer_getsBankSpecificAccountNumber_whenHeCreatesAnAccount(){
-        Bank firstBank = centralBankOfNigeria.registerNewBank("First Bank of Nigeria", "FBN");
         Customer customer = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
         gtBank.register(customer, AccountType.SAVINGS);
         String customerGtBankAccountNumber = customer.getMyAccount().get(0).getAccountNumber();
@@ -158,7 +158,6 @@ public class BankingApplicationTests {
 
     @Test
     void customer_canDepositMoneyFromBank_WithTheirAccountNumber(){
-
         Customer customer = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
         gtBank.register(customer, AccountType.SAVINGS);
         Account customerAccount = customer.getMyAccount().get(0);
@@ -170,7 +169,6 @@ public class BankingApplicationTests {
 
     @Test
     void customer_canDepositMoney_inTheirAccountBank(){
-        Bank firstBank = centralBankOfNigeria.registerNewBank("First Bank of Nigeria", "FBN");
 
         Customer customer = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
         gtBank.register(customer, AccountType.SAVINGS);
@@ -298,6 +296,44 @@ public class BankingApplicationTests {
         gtBank.withDrawMoneyFrom(customerAccountNumber, BigDecimal.valueOf(1200), 1111);
 
         assertThat(customerAccount.getTransaction().size(), is(3));
+
+    }
+
+    @Test
+    void customers_canTransferFunds_viaCbn() {
+        Customer chibuzo = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
+        gtBank.register(chibuzo, AccountType.SAVINGS);
+        Account chibuzoAccount = chibuzo.getMyAccount().get(0);
+        chibuzoAccount.updatePin(0, 1111);
+        String chibuzoAccountNumber = chibuzoAccount.getAccountNumber();
+        gtBank.depositMoneyIntoAccount(BigDecimal.valueOf(2500), chibuzoAccountNumber);
+
+        Customer dozie = new Customer("Dozie", "Cohort 5", "Semicolon Village");
+        firstBank.register(dozie, AccountType.SAVINGS);
+        Account dozieAccount = dozie.getMyAccount().get(0);
+        String dozieAccountNumber = dozieAccount.getAccountNumber();
+
+        gtBank.transfer(new TransferRequest(BigDecimal.valueOf(1000), chibuzoAccountNumber, dozieAccountNumber, 1111), "fbn");
+
+        assertThat(dozieAccount.calculateAccountBalance(), is(BigDecimal.valueOf(1000)));
+        assertThat(chibuzoAccount.calculateAccountBalance(), is(BigDecimal.valueOf(1500)));
+
+    }
+
+    @Test
+    void notificationService_canCreateAlert_FromCompletedTransaction(){
+        Customer chibuzo = new Customer("Chibuzo", "Gabriel", "Semicolon Village");
+        gtBank.register(chibuzo, AccountType.SAVINGS);
+        Account chibuzoAccount = chibuzo.getMyAccount().get(0);
+        chibuzoAccount.updatePin(0, 1111);
+        String chibuzoAccountNumber = chibuzoAccount.getAccountNumber();
+        gtBank.depositMoneyIntoAccount(BigDecimal.valueOf(2500), chibuzoAccountNumber);
+
+        Transaction transaction = chibuzoAccount.getTransaction().get(0);
+        NotificationService notifier = new SmsNotification();
+        Alert alert = notifier.createAlert(chibuzoAccount, transaction);
+        assertThat(alert, is(notNullValue()));
+        System.out.println(alert);
 
     }
 

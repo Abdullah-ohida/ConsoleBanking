@@ -12,13 +12,18 @@ import static io.eagletech.BankingApplication.TransactionType.*;
 public  class Bank implements Storable{
 
     private final String bankFullName;
+
     private final String bankShortName;
     @Getter
     private  final String bankCode;
-    private Database<Account> accountDatabase;
+
+    private final Database<Account> accountDatabase;
+    private final NotificationService notificationService = new SmsNotification();
+
+
     public Bank(String bankFullName, String bankShortName, String bankUniqueSixDigitCode) {
         this.bankFullName = bankFullName;
-        this.bankShortName = bankShortName;
+        this.bankShortName = bankShortName.toLowerCase();
         bankCode = bankUniqueSixDigitCode;
         accountDatabase = new DatabaseImpl<>();
     }
@@ -79,7 +84,7 @@ public  class Bank implements Storable{
     public void closeAccountFor(Customer customer,String accountNumber) {
         Optional<Account> account = accountDatabase.findById(accountNumber);
         account.ifPresent(account1 -> {
-                    if (!account.get().getAcountName().equalsIgnoreCase(customer.getCustomerFirstName() + " " + customer.getCustomerLastName())) {
+                    if (!account.get().getAccountName().equalsIgnoreCase(customer.getCustomerFirstName() + " " + customer.getCustomerLastName())) {
                         throw new BankingApplicationException("Account number does not belong to customer");
                     }
                     accountDatabase.delete(account1);
@@ -95,30 +100,44 @@ public  class Bank implements Storable{
         return bankCode;
     }
 
-    public void depositMoneyIntoAccount(BigDecimal amountToDeposit, String customerAccountNumber) {
+    @Override
+    public String getName() {
+        return bankShortName;
+    }
+
+
+
+    public void depositMoneyIntoAccount(BigDecimal amountToDeposit, String customerAccountNumber, TransactionType transactionType) {
         Optional<Account> optionalAccount =accountDatabase.findById(customerAccountNumber);
         if(optionalAccount.isPresent()){
-            saveTransaction(optionalAccount.get(), CREDIT, amountToDeposit);
+          notifyCustomerViaSms(saveTransaction(optionalAccount.get(), transactionType, amountToDeposit), optionalAccount.get());
         }
         else{
             throw new DepositFailedException("Account not found");
         }
 
     }
+    public void notifyCustomerViaSms(Transaction transaction,Account customerAccount ){
+        notificationService.notify(notificationService.createAlert(customerAccount, transaction));
+    }
 
-    private void saveTransaction(Account optionalAccount, TransactionType transactionType, BigDecimal transactionAmount) {
-        optionalAccount.getTransaction().add(new Transaction(generateTransactionId(transactionType, optionalAccount.getAccountNumber()), transactionType, transactionAmount, optionalAccount.getAcountName()));
+    private Transaction saveTransaction(Account optionalAccount, TransactionType transactionType, BigDecimal transactionAmount) {
+        Transaction transaction = new Transaction(generateTransactionId(transactionType, optionalAccount.getAccountNumber()), transactionType, transactionAmount, optionalAccount.getAccountName());
+        optionalAccount.getTransaction().add(transaction);
+        return transaction;
     }
 
     private String generateTransactionId(TransactionType transactionType, String accountNumber) {
         String transactionPrefix = switch (transactionType){
             case DEBIT-> "dbt";
             case CREDIT -> "crd";
+            case TRANSFER_IN -> "tnxIn";
+            case TRANSFER_OUT -> "tnxOut";
         };
         return accountNumber + transactionPrefix+ LocalDateTime.now();
     }
 
-    public void withDrawMoneyFrom(String customerAccountNumber, BigDecimal amountToWithdraw, int accountPin) {
+    public void withDrawMoneyFrom(String customerAccountNumber, BigDecimal amountToWithdraw, int accountPin,TransactionType transactionType) {
         Optional<Account> optionalAccount =accountDatabase.findById(customerAccountNumber);
         if(optionalAccount.isPresent()){
             optionalAccount.get().verifyLegibilityForWithdraw(amountToWithdraw, accountPin);
@@ -126,15 +145,30 @@ public  class Bank implements Storable{
         else{
             throw new WithdrawFailedException("Account not found");
         }
-        saveTransaction(optionalAccount.get(), DEBIT, amountToWithdraw);
+        notifyCustomerViaSms(saveTransaction(optionalAccount.get(), transactionType, amountToWithdraw), optionalAccount.get());
     }
 
     public void transfer(TransferRequest transferRequest) throws BankingApplicationException{
         Optional<Account> senderAccount = accountDatabase.findById(transferRequest.getSenderAccountNumber());
         Optional<Account> receiverAccount = accountDatabase.findById(transferRequest.getReceiverAccountNumber());
         if(senderAccount.isPresent() && receiverAccount.isPresent()){
-            withDrawMoneyFrom(transferRequest.getSenderAccountNumber(), transferRequest.getAmountToTransfer(), transferRequest.getSenderAccountPin());
-            depositMoneyIntoAccount(transferRequest.getAmountToTransfer(), transferRequest.getReceiverAccountNumber());
+            withDrawMoneyFrom(transferRequest.getSenderAccountNumber(), transferRequest.getAmountToTransfer(), transferRequest.getSenderAccountPin(), TRANSFER_OUT);
+            depositMoneyIntoAccount(transferRequest.getAmountToTransfer(), transferRequest.getReceiverAccountNumber(), TRANSFER_IN);
         }
+    }
+
+    public void transfer(TransferRequest transferRequest, String receivingBankShortName) {
+        CentralBank centralBank = CentralBank.createCentralBank();
+        transferRequest.setReceiverBank(receivingBankShortName);
+        transferRequest.setSenderBank(this);
+        centralBank.transferFundsWith(transferRequest);
+    }
+
+    public void depositMoneyIntoAccount(BigDecimal valueOf, String accountNumber) {
+        depositMoneyIntoAccount(valueOf, accountNumber, CREDIT);
+    }
+
+    public void withDrawMoneyFrom(String accountNumber, BigDecimal valueOf, int i) {
+        withDrawMoneyFrom(accountNumber,valueOf, i,DEBIT);
     }
 }

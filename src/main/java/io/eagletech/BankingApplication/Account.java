@@ -9,18 +9,18 @@ import java.util.List;
 
 public class Account implements Storable {
     @Getter
-    private String acountName;
-    private String accountNumber;
-    private String customerBvn;
-    private String bankName;
-    private AccountType accountType;
-    private List<Transaction> successfulTransactions;
+    private final String accountName;
+    private final String accountNumber;
+    private final String customerBvn;
+    private final String bankName;
+    private final AccountType accountType;
+    private final List<Transaction> successfulTransactions;
     private int pin;
 
 
 
     public Account(Customer customer, String accountNumber, String bankName, AccountType accountType) {
-        this.acountName = customer.getCustomerFirstName() + " " + customer.getCustomerLastName();
+        this.accountName = customer.getCustomerFirstName() + " " + customer.getCustomerLastName();
         this.accountNumber = accountNumber;
         this.accountType = accountType;
         customerBvn = customer.getBvn();
@@ -33,7 +33,7 @@ public class Account implements Storable {
     @Override
     public String toString() {
         String accountProfile = "";
-        accountProfile += "Account Name: " + acountName + "\n";
+        accountProfile += "Account Name: " + accountName + "\n";
         accountProfile += "Account Number: " + accountNumber + "\n";
         accountProfile += "Bank Name: " + bankName + "\n";
         accountProfile += "Account Type: " + accountType.toString() + "\n";
@@ -46,8 +46,8 @@ public class Account implements Storable {
         BigDecimal customerCurrentAccountBalance = new BigDecimal(0);
         for(Transaction transaction: successfulTransactions){
             switch (transaction.getTransactionType()){
-                case DEBIT -> customerCurrentAccountBalance= customerCurrentAccountBalance.subtract(transaction.getTransactionAmount());
-                case CREDIT -> customerCurrentAccountBalance = customerCurrentAccountBalance.add(transaction.getTransactionAmount());
+                case DEBIT, TRANSFER_OUT -> customerCurrentAccountBalance= customerCurrentAccountBalance.subtract(transaction.getTransactionAmount());
+                case CREDIT, TRANSFER_IN -> customerCurrentAccountBalance = customerCurrentAccountBalance.add(transaction.getTransactionAmount());
             }
 
         }
@@ -61,6 +61,11 @@ public class Account implements Storable {
     @Override
     public String getId() {
         return accountNumber;
+    }
+
+    @Override
+    public String getName() {
+        return accountName;
     }
 
     void updatePin(int oldPin, int newPin) {
