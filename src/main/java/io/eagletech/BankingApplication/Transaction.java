@@ -6,14 +6,13 @@ import lombok.Getter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Getter
 public class Transaction {
-    private String transactionId;
-    @Getter
+    private final String transactionId;
     private final TransactionType transactionType;
     private final LocalDateTime transactionDate;
-    @Getter
     private final BigDecimal transactionAmount;
-    private String actorName;
+    private final String actorName;
 
     public Transaction (String transactionId, TransactionType transactionType, BigDecimal transactionAmount, String actorName){
             this.transactionId = transactionId;
