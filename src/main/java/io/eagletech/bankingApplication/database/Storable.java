@@ -1,4 +1,4 @@
-package io.eagletech.BankingApplication;
+package io.eagletech.bankingApplication.database;
 
 public interface Storable {
     String getId();

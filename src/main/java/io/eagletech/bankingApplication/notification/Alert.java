@@ -1,4 +1,4 @@
-package io.eagletech.BankingApplication;
+package io.eagletech.bankingApplication.notification;
 
 public abstract class Alert {
 

@@ -1,11 +1,18 @@
-package io.eagletech.BankingApplication;
+package io.eagletech.bankingApplication;
 
+import io.eagletech.bankingApplication.dtos.requestModels.TransferRequest;
+import io.eagletech.bankingApplication.exceptions.BankingApplicationException;
+import io.eagletech.bankingApplication.exceptions.DepositFailedException;
+import io.eagletech.bankingApplication.exceptions.WithdrawFailedException;
+import io.eagletech.bankingApplication.models.*;
+import io.eagletech.bankingApplication.notification.Alert;
+import io.eagletech.bankingApplication.notification.NotificationService;
+import io.eagletech.bankingApplication.notification.SmsNotification;
 import org.junit.jupiter.api.*;
 
 
 import java.math.BigDecimal;
 
-import static io.eagletech.BankingApplication.TransactionType.CREDIT;
 import static org.hamcrest.Matchers.*;
 import  static org.hamcrest.MatcherAssert.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -46,7 +53,9 @@ public class BankingApplicationTests {
     void centralBank_canBeCreated(){
         assertThat(centralBankOfNigeria, is(notNullValue()));
         CentralBank centralBank2 = CentralBank.createCentralBank();
-        assertThat(centralBankOfNigeria,is(centralBank2));
+        CentralBank centralBank3 = CentralBank.createCentralBank();
+        assertThat(centralBank3,is(centralBank2));
+
     }
 
     @Test

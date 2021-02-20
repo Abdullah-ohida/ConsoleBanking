@@ -1,4 +1,9 @@
-package io.eagletech.BankingApplication;
+package io.eagletech.bankingApplication.models;
+
+import io.eagletech.bankingApplication.database.Database;
+import io.eagletech.bankingApplication.database.DatabaseImpl;
+import io.eagletech.bankingApplication.dtos.requestModels.TransferRequest;
+import io.eagletech.bankingApplication.exceptions.BankingApplicationException;
 
 import java.security.SecureRandom;
 import java.util.Map;
@@ -6,8 +11,8 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.eagletech.BankingApplication.TransactionType.TRANSFER_IN;
-import static io.eagletech.BankingApplication.TransactionType.TRANSFER_OUT;
+import static io.eagletech.bankingApplication.models.TransactionType.TRANSFER_IN;
+import static io.eagletech.bankingApplication.models.TransactionType.TRANSFER_OUT;
 
 public class CentralBank {
     private final Database<Bank> registeredBanks;

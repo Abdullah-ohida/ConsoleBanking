@@ -1,4 +1,4 @@
-package io.eagletech.BankingApplication;
+package io.eagletech.bankingApplication.database;
 
 import java.util.List;
 import java.util.Optional;

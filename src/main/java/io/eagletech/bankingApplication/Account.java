@@ -1,6 +1,12 @@
-package io.eagletech.BankingApplication;
+package io.eagletech.bankingApplication;
 
 
+import io.eagletech.bankingApplication.database.Storable;
+import io.eagletech.bankingApplication.exceptions.InvalidPinException;
+import io.eagletech.bankingApplication.exceptions.WithdrawFailedException;
+import io.eagletech.bankingApplication.models.AccountType;
+import io.eagletech.bankingApplication.models.Customer;
+import io.eagletech.bankingApplication.models.Transaction;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -91,9 +97,7 @@ public class Account implements Storable {
 
     private int getPin() {
         if (pin == 0) throw new InvalidPinException("Pin not Set");
-
         return pin;
-
     }
 
     private void setPin(int newPin) {

@@ -1,6 +1,7 @@
-package io.eagletech.BankingApplication;
+package io.eagletech.bankingApplication.notification;
 
-import java.util.Locale;
+import io.eagletech.bankingApplication.Account;
+import io.eagletech.bankingApplication.models.Transaction;
 
 public class SmsAlert extends Alert {
     private String alertTitle;

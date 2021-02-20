@@ -1,5 +1,8 @@
-package io.eagletech.BankingApplication;
+package io.eagletech.bankingApplication.models;
 
+import io.eagletech.bankingApplication.Account;
+import io.eagletech.bankingApplication.database.Database;
+import io.eagletech.bankingApplication.database.DatabaseImpl;
 import lombok.Getter;
 import lombok.Setter;
 

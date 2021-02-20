@@ -1,5 +1,6 @@
-package io.eagletech.BankingApplication;
+package io.eagletech.bankingApplication.dtos.requestModels;
 
+import io.eagletech.bankingApplication.models.Bank;
 import lombok.Getter;
 import lombok.Setter;
 

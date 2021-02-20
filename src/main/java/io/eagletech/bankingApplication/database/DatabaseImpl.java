@@ -1,8 +1,7 @@
-package io.eagletech.BankingApplication;
+package io.eagletech.bankingApplication.database;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 public class DatabaseImpl<K extends Storable> implements Database<K> {

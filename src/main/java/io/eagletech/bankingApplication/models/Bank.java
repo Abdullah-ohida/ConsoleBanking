@@ -1,5 +1,15 @@
-package io.eagletech.BankingApplication;
+package io.eagletech.bankingApplication.models;
 
+import io.eagletech.bankingApplication.Account;
+import io.eagletech.bankingApplication.database.Database;
+import io.eagletech.bankingApplication.database.DatabaseImpl;
+import io.eagletech.bankingApplication.database.Storable;
+import io.eagletech.bankingApplication.dtos.requestModels.TransferRequest;
+import io.eagletech.bankingApplication.exceptions.BankingApplicationException;
+import io.eagletech.bankingApplication.exceptions.DepositFailedException;
+import io.eagletech.bankingApplication.exceptions.WithdrawFailedException;
+import io.eagletech.bankingApplication.notification.NotificationService;
+import io.eagletech.bankingApplication.notification.SmsNotification;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -7,9 +17,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static io.eagletech.BankingApplication.TransactionType.*;
+import static io.eagletech.bankingApplication.models.TransactionType.*;
 
-public  class Bank implements Storable{
+public  class Bank implements Storable {
 
     private final String bankFullName;
 
@@ -19,6 +29,18 @@ public  class Bank implements Storable{
 
     private final Database<Account> accountDatabase;
     private final NotificationService notificationService = new SmsNotification();
+
+
+    @Override
+    public String getId() {
+        return bankCode;
+    }
+
+    @Override
+    public String getName() {
+        return bankShortName;
+    }
+
 
 
     public Bank(String bankFullName, String bankShortName, String bankUniqueSixDigitCode) {
@@ -71,15 +93,6 @@ public  class Bank implements Storable{
     }
 
 
-    @Override
-    public String toString(){
-        StringBuilder bankToString = new StringBuilder();
-        bankToString.append("Bank Name: ").append(bankFullName).append("\n");
-        bankToString.append("Bank Short Name: ").append(bankShortName).append("\n");
-        bankToString.append("Bank Code: ").append(bankCode).append("\n");
-
-        return bankToString.toString();
-    }
 
     public void closeAccountFor(Customer customer,String accountNumber) {
         Optional<Account> account = accountDatabase.findById(accountNumber);
@@ -95,17 +108,6 @@ public  class Bank implements Storable{
 
     }
 
-    @Override
-    public String getId() {
-        return bankCode;
-    }
-
-    @Override
-    public String getName() {
-        return bankShortName;
-    }
-
-
 
     public void depositMoneyIntoAccount(BigDecimal amountToDeposit, String customerAccountNumber, TransactionType transactionType) {
         Optional<Account> optionalAccount =accountDatabase.findById(customerAccountNumber);
@@ -117,7 +119,7 @@ public  class Bank implements Storable{
         }
 
     }
-    public void notifyCustomerViaSms(Transaction transaction,Account customerAccount ){
+    public void notifyCustomerViaSms(Transaction transaction, Account customerAccount ){
         notificationService.notify(notificationService.createAlert(customerAccount, transaction));
     }
 
@@ -171,4 +173,15 @@ public  class Bank implements Storable{
     public void withDrawMoneyFrom(String accountNumber, BigDecimal valueOf, int i) {
         withDrawMoneyFrom(accountNumber,valueOf, i,DEBIT);
     }
+
+    @Override
+    public String toString(){
+        StringBuilder bankToString = new StringBuilder();
+        bankToString.append("Bank Name: ").append(bankFullName).append("\n");
+        bankToString.append("Bank Short Name: ").append(bankShortName).append("\n");
+        bankToString.append("Bank Code: ").append(bankCode).append("\n");
+
+        return bankToString.toString();
+    }
+
 }

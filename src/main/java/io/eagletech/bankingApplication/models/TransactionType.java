@@ -1,4 +1,4 @@
-package io.eagletech.BankingApplication;
+package io.eagletech.bankingApplication.models;
 
 public enum TransactionType {
     DEBIT, CREDIT, TRANSFER_IN, TRANSFER_OUT;

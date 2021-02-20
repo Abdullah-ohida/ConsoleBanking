@@ -1,6 +1,5 @@
-package io.eagletech.BankingApplication;
+package io.eagletech.bankingApplication.models;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.math.BigDecimal;

@@ -1,4 +1,4 @@
-package io.eagletech.BankingApplication;
+package io.eagletech.bankingApplication.models;
 
 public enum AccountType {
     SAVINGS, CURRENT, KIDDIES;
